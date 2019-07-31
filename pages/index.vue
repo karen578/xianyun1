@@ -17,8 +17,13 @@
         >{{item.titile}}</span>
       </el-row>
       <!-- 搜索框 -->
-      <el-input :placeholder="options[current].placeholder" style="width:380px">
-        <el-button slot="append" icon="el-icon-search"></el-button>
+      <el-input :placeholder="options[current].placeholder"
+       style="width:380px"
+       v-model="searchStr"
+        @keyup.enter.native="searchCity">
+        <el-button slot="append"
+        @click="searchCity"
+         icon="el-icon-search"></el-button>
       </el-input>
     </div>
   </div>
@@ -33,7 +38,8 @@ export default {
         { titile: "酒店", placeholder: "请输入城市搜索酒店" },
         { titile: "机票", placeholder: "搜索城市" }
       ],
-      current: 0
+      current: 0,
+      searchStr:''
     };
   },
   methods: {
@@ -42,6 +48,15 @@ export default {
         if(this.current===2){
             this.$router.push('/air')
         }
+    },
+    searchCity(){
+      console.log(123);
+      this.$axios({
+        url:'/cities',
+        params:{name:this.searchStr}
+      }).then(res=>{
+        console.log(res);
+      })
     }
   },
   mounted() {

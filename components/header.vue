@@ -10,20 +10,22 @@
         <nuxt-link to="/hotel">酒店</nuxt-link>
         <nuxt-link to="/air">国内机票</nuxt-link>
       </el-row>
-      <div class="login" v-if="false">
-        <nuxt-link>登录 / 注册</nuxt-link>
+      <div class="login" v-if="!$store.state.user.userInfo.token">
+        <!-- 用nuxt-link的时候要用到to ,不用to的时候会报错 -->
+        <nuxt-link to="/user/login">登录 / 注册</nuxt-link>
       </div>
-      <div class="self">
+      <div class="self" v-else>
         <el-row type="flex" justify="space-between">
-          <img src="http://157.122.54.189:9095/assets/images/avatar.jpg" alt />
+          <img :src="`${$axios.defaults.baseURL}${$store.state.user.userInfo.user.defaultAvatar}`" alt />
           <el-dropdown>
             <span class="el-dropdown-link">
-              银河拖拉机
+              {{$store.state.user.userInfo.user.nickname}}
               <i class="el-icon-arrow-down el-icon--right"></i>
             </span>
             <el-dropdown-menu slot="dropdown">
               <el-dropdown-item>个人中心</el-dropdown-item>
-              <el-dropdown-item>退出</el-dropdown-item>
+              <el-dropdown-item  @click.native="handleClear"> 退出
+                </el-dropdown-item>
             </el-dropdown-menu>
           </el-dropdown>
         </el-row>
@@ -32,7 +34,16 @@
   </header>
 </template>
 .<script>
-export default {};
+export default {
+  //从商品仓库中获取到的数据，一层一层的获取
+  methods:{
+     handleClear(){
+      //  清除了登录，把本地的数据都清除
+       this.$store.commit('user/clearUserInfo')
+       this.$router.push("/user/login")
+     }
+  }
+};
 </script>
 <style lang="less" scoped>
 header {
