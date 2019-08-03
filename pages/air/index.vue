@@ -115,7 +115,7 @@ export default {
       
         .picsP{
             width: 225px;
-            height: 140px;
+            height: 150px;
             overflow: hidden;
             padding: 20px 0;
             margin-bottom: 20px;
@@ -125,12 +125,14 @@ export default {
             }
         }
         .picsText{
+            width: 100%;
             position: absolute;
             bottom: 0;
             left: 0;
+            background:rgba(0,0,0,.5);
             span{
               color: #fff;
-              margin-left: 30px;
+              // margin-left: 20px;
             }
         }
     }

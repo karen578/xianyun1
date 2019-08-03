@@ -37,17 +37,20 @@
           type="date"
           placeholder="选择日期时间"
           style="width:210px"
-          @change="handleChange"
+          @change="handleDate"
         ></el-date-picker>
       </el-row>
       <p @click="searchSubmit">
         <i class="el-icon-search"></i> 搜索
       </p>
     </div>
+    <div class="box">
+      <p @click="handleChange">换</p>
+    </div>
   </div>
 </template>
 <script>
-import moment from 'moment'
+import moment from "moment";
 export default {
   data() {
     return {
@@ -131,38 +134,46 @@ export default {
       this.airForm.destCode = item.sort;
     },
     // 选中日期触发事件
-    handleChange(value) {
-       this.airForm.departDate=moment(value).format('YYYY-MM-DD')   
+    handleDate(value) {
+     
+      this.airForm.departDate = moment(value).format("YYYY-MM-DD");
+      // console.log(this.airForm.departDate);
+    },
+    //点击换触发事件
+    handleChange(){
+      const{departCity,departCode,destCity,destCode}=this.airForm
+      this.airForm.departCity=destCity
+      this.airForm.departCode=destCode
+      this.airForm.destCity=departCity
+      this.airForm.destCode=departCode
     },
     // 提交搜索触发的事件
-     searchSubmit(){
-         if(!this.airForm.departCity){
-             this.$alert('出发城市不能为空','提示',{type:'warning'})
-             return
-         }
-         if(!this.airForm.destCity){
-             this.$alert('达到城市不能为空','提示',{type:'warning'})
-             return
-         }
-         if(!this.airForm.departDate){
-             this.$alert('出发时间不能为空','提示',{type:'warning'})
-             return
-         }
-        //  console.log(this.airForm);
-        this.$axios({
-            url:'/airs',
-            params:this.airForm
-        }).then(res=>{
-            // console.log(res);
-            // 获取到了数据，跳转到机票列表页面
-            this.$router.push({
-                path:'/air/flights',
-                query:this.airForm
-            })
-        })
-         
-     }
-
+    searchSubmit() {
+      if (!this.airForm.departCity) {
+        this.$alert("出发城市不能为空", "提示", { type: "warning" });
+        return;
+      }
+      if (!this.airForm.destCity) {
+        this.$alert("达到城市不能为空", "提示", { type: "warning" });
+        return;
+      }
+      if (!this.airForm.departDate) {
+        this.$alert("出发时间不能为空", "提示", { type: "warning" });
+        return;
+      }
+      //  console.log(this.airForm);
+      this.$axios({
+        url: "/airs",
+        params: this.airForm
+      }).then(res => {
+        // console.log(res);
+        // 获取到了数据，跳转到机票列表页面
+        this.$router.push({
+          path: "/air/flights",
+          query: this.airForm
+        });
+      });
+    }
   }
 };
 </script>
@@ -182,13 +193,16 @@ export default {
       text-align: center;
       display: block;
       padding: 15px 0;
+       cursor: pointer;
     }
     .active {
       border-top: 3px solid #ffa500;
       background-color: #fff;
+     
     }
   }
   .tabShow {
+    padding-right: 30px;
     .tabRows {
       padding: 10px 0;
       span {
@@ -204,9 +218,30 @@ export default {
       text-align: center;
       background-color: #409eff;
       color: #fff;
-      margin-left: 105px;
+      margin-left: 90px;
       border-radius: 5px;
       margin-top: 20px;
+    }
+  }
+  .box {
+    width: 30px;
+    height: 60px;
+    border: 1px solid #ccc;
+    border-left: none;
+    position: absolute;
+    top: 95px;
+    left: 300px;
+    p {
+      width: 15px;
+      height: 15px;
+      padding: 5px;
+      background-color: #999999;
+      font-size: 12px;
+      color: #fff;
+      position: absolute;
+      top: 18px;
+      left: 20px;
+      cursor: pointer;
     }
   }
 }
