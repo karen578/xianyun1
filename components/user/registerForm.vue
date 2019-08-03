@@ -1,129 +1,117 @@
 <template>
-  <el-form :model="form" ref="form" :rules="rules" class="form">
-    <el-form-item class="form-item" prop="username">
-      <el-input placeholder="用户名手机" v-model="form.username"></el-input>
-    </el-form-item>
-
-    <el-form-item class="form-item" prop="captcha">
-      <el-input placeholder="验证码" v-model="form.captcha">
-        <template slot="append">
-          <el-button @click="handleSendCaptcha">发送验证码</el-button>
-        </template>
-      </el-input>
-    </el-form-item>
-
-    <el-form-item class="form-item" prop="nickname">
-      <el-input placeholder="昵称" v-model="form.nickname"></el-input>
-    </el-form-item>
-
-    <el-form-item class="form-item" prop="password">
-      <el-input placeholder="密码" type="password" v-model="form.password"></el-input>
-    </el-form-item>
-
-    <el-form-item class="form-item" prop="checkPassword">
-      <el-input placeholder="确认密码" type="password" v-model="form.checkPassword"></el-input>
-    </el-form-item>
-
-    <el-button class="submit" type="primary" @click="handleRegSubmit">注册</el-button>
-  </el-form>
+  <div class="registerform">
+    <el-form :model="registerform" :rules="rules" ref="registerform" class="formsrow">
+      <el-form-item prop="username">
+        <el-input v-model="registerform.username" placeholder="用户名手机"></el-input>
+      </el-form-item>
+      <el-form-item prop="captcha">
+        <el-row type="flex" class="row-bg">
+          <el-input v-model="registerform.captcha" style="width:310px" placeholder="验证码"></el-input>
+          <span @click="giveCaptcha">发送验证码</span>
+        </el-row>
+      </el-form-item>
+      <el-form-item prop="nickname">
+        <el-input v-model="registerform.nickname" placeholder="昵称"></el-input>
+      </el-form-item>
+      <el-form-item prop="password">
+        <el-input v-model="registerform.password" placeholder="密码" type="password"></el-input>
+      </el-form-item>
+      <el-form-item prop="checkPassword">
+        <el-input v-model="registerform.checkPassword" placeholder="确认密码" type="password"></el-input>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" style="width:100%" @click="submitClick">注册</el-button>
+      </el-form-item>
+    </el-form>
+  </div>
 </template>
 <script>
 export default {
   data() {
     var validatePass2 = (rule, value, callback) => {
-      if (value === "") {
-        callback(new Error("请再次输入密码"));
-      } else if (value !== this.form.password) {
-        callback(new Error("两次输入密码不一致!"));
-      } else {
-        callback();
-      }
-    };
+        if (value === '') {
+          callback(new Error('请再次输入密码'));
+        } else if (value !== this.registerform.password) {
+          callback(new Error('两次输入密码不一致!'));
+        } else {
+          callback();
+        }
+      };
     return {
-      // 表单数据
-      form: {
+      registerform: {
         username: "",
-        nickname: "",
-        captcha: "",
         password: "",
+        captcha: "",
+        nickname: "",
         checkPassword: ""
       },
-
-      // 表单规则
       rules: {
         username: [
-          { required: true, message: "账号不能为空", trigger: "blur" }
+          { required: true, message: "请输入用户名", trigger: "blur" }
         ],
-        password: [
-          { required: true, message: "密码不能为空", trigger: "blur" }
-        ],
-        nickname: [
-          { required: true, message: "昵称不能为空", trigger: "blur" }
-        ],
-        captcha: [
-          { required: true, message: "验证码不能为空", trigger: "blur" }
-        ],
-        checkPassword: [
-          { require: true, message: "验证码不能为空", trigger: "blur" },
-          { validator: validatePass2, trigger: "blur" }
-        ]
+        captcha: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+        nickname: [{ required: true, message: "请输入昵称", trigger: "blur" }],
+        password: [{ required: true, message: "请输入密码", trigger: "blur" }],
+        checkPassword: [{ required: true, message: "请输入确认密码", trigger: "blur" },
+       { validator: validatePass2, trigger: 'blur' } ],
       }
     };
   },
-  methods: {
-    // 发送验证码
-    handleSendCaptcha() {
+  methods:{
+    //发送验证码
+    giveCaptcha(){
+      console.log(123);
+      if(!this.registerform.username){
+        this.$message.warning("用户名不能为空")
+        return
+      }
       this.$axios({
-        url: "/captchas",
-        method: "POST",
-        data: { tel: this.form.username }
-      }).then(res => {
+        url:'/captchas',
+        method:'POST',
+        data:{tel:this.registerform.username}
+      }).then(res=>{
         console.log(res);
-        this.$message.success("发送验证码成功");
-      });
+        this.$message.success("验证码发送成功")
+      })
     },
-
-    // 注册
-    handleRegSubmit() {
-      const { checkPassword, ...pops } = this.form;
-      this.$refs.form.validate(valid => {
-        if (valid) {
+    submitClick(){
+      const{checkPassword,...prop}=this.registerform
+      this.$refs.registerform.validate(valid=>{
+        if(valid){
           this.$axios({
-            url: "/accounts/register",
-            method: "POST",
-            data: pops
+            url:'/accounts/register',
+            method:'POST',
+            data:prop
           }).then(res=>{
-              console.log(res.data);
-              this.$store.commit('user/setUserInfo',res.data)
-              this.$router.push('/')
+            console.log(res);
+            this.$message.success("注册成功")
+            this.$store.commit("user/setUserInfo",res.data)
+            this.$router.push("/")
           })
         }
-      });
-
-      console.log(this.form);
+      })
     }
+
+
   }
 };
 </script>
-
-<style scoped lang="less">
-.form {
-  padding: 25px;
+<style lang="less" scoped>
+/deep/.registerform {
+  height: 350px;
+  background-color: #fff;
 }
-
-.form-item {
-  margin-bottom: 20px;
-}
-
-.form-text {
-  font-size: 12px;
-  color: #409eff;
-  text-align: right;
-  line-height: 1;
-}
-
-.submit {
-  width: 100%;
-  margin-top: 10px;
+/deep/.formsrow {
+  text-align: center;
+  padding: 20px;
+  span{
+      width: 70px;
+      display: block;
+      padding:0 20px;
+      background-color: #f5f7fa;
+      margin-left: -2px;
+      
+  }
 }
 </style>
+
