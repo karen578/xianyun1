@@ -97,7 +97,7 @@ export default {
         });
 
         // 如果用户没有从下来列表中选中数据，就默认从下拉列表的数据是用户输入的数据
-        this.airForm.departCity = newData[0].name;
+        this.airForm.departCity = newData[0].value;
         this.airForm.departCode = newData[0].sort;
         cb(newData);
       });
@@ -117,7 +117,7 @@ export default {
           v.value = v.name.replace("市", "");
           return v;
         });
-        this.airForm.destCity = newData[0].name;
+        this.airForm.destCity = newData[0].value;
         this.airForm.destCode = newData[0].sort;
         cb(newData);
       });
@@ -125,27 +125,26 @@ export default {
     //出发下拉列表选择触发事件
     handleSelectFrom(item) {
       console.log(item);
-      this.airForm.departCity = item.name;
+      this.airForm.departCity = item.value;
       this.airForm.departCode = item.sort;
     },
     //出发下拉列表选择触发事件
     handleSelectTo(item) {
-      this.airForm.destCity = item.name;
+      this.airForm.destCity = item.value;
       this.airForm.destCode = item.sort;
     },
     // 选中日期触发事件
     handleDate(value) {
-     
       this.airForm.departDate = moment(value).format("YYYY-MM-DD");
       // console.log(this.airForm.departDate);
     },
     //点击换触发事件
-    handleChange(){
-      const{departCity,departCode,destCity,destCode}=this.airForm
-      this.airForm.departCity=destCity
-      this.airForm.departCode=destCode
-      this.airForm.destCity=departCity
-      this.airForm.destCode=departCode
+    handleChange() {
+      const { departCity, departCode, destCity, destCode } = this.airForm;
+      this.airForm.departCity = destCity;
+      this.airForm.departCode = destCode;
+      this.airForm.destCity = departCity;
+      this.airForm.destCode = departCode;
     },
     // 提交搜索触发的事件
     searchSubmit() {
@@ -166,12 +165,20 @@ export default {
         url: "/airs",
         params: this.airForm
       }).then(res => {
-        // console.log(res);
         // 获取到了数据，跳转到机票列表页面
         this.$router.push({
           path: "/air/flights",
           query: this.airForm
         });
+        //获取出本地vuex的数据
+        const arr =[...this.$store.state.air.history];
+        //新的记录添加到第一个
+        arr.unshift(this.airForm);
+        if(arr.length>5){
+          arr.length=5
+        }
+         // 调用vuex的方法保存数据
+        this.$store.commit("air/setHistory",arr);
       });
     }
   }
@@ -193,12 +200,11 @@ export default {
       text-align: center;
       display: block;
       padding: 15px 0;
-       cursor: pointer;
+      cursor: pointer;
     }
     .active {
       border-top: 3px solid #ffa500;
       background-color: #fff;
-     
     }
   }
   .tabShow {

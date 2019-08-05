@@ -1,47 +1,54 @@
 <template>
-  <div class="flight-item"  @click="isShow=!isShow">
-    <div>
-      <!-- 显示的机票信息 -->
-      <el-row type="flex" align="middle" class="flight-info">
-        <el-col :span="6">
-          <span>{{data.airline_name}}</span>{{data.flight_no}}
+  <div class="flightslist" @click="isShow=!isShow">
+    <!-- 显示出来的列表详情 -->
+    <el-row type="flex" class="listDetail" justify="space-between">
+      <el-col :span="7" class="flightName">
+        <span>{{data.airline_name}}</span>
+        <span>{{data.flight_no}}</span>
+      </el-col>
+      <el-col :span="4" class="desLocation">
+        <p>{{data.dep_time}}</p>
+        <span>{{data.org_airport_name}}{{data.org_airport_quay}}</span>
+      </el-col>
+      <el-col :span="4" class="timing">
+        <p>{{getTime}}</p>
+      </el-col>
+      <el-col :span="4" class="desLocation">
+        <p>{{data.arr_time}}</p>
+        <span>{{data.dst_airport_name}}{{data.dst_airport_quay}}</span>
+      </el-col>
+      <el-col :span="5" class="price">
+        <span>￥</span>
+        <strong>{{data.seat_infos[0].org_settle_price_child}}</strong>
+        <span>起</span>
+      </el-col>
+    </el-row>
+    <!-- 隐藏的列表详情 align="middle"是为了侧轴水平方向垂直-->
+    <div class="hiddenBox">
+      <el-row type="flex" class="contain" justify="space-between" align="middle" v-show="isShow">
+        <el-col :span="4" class="leftContain">
+          <span>低价推荐</span>
         </el-col>
-        <el-col :span="12">
-          <el-row type="flex" justify="space-between" class="flight-info-center">
-            <el-col :span="8" class="flight-airport">
-              <strong>{{data.dep_time}}</strong>
-              <span>{{data.org_airport_name}}T1</span>
-            </el-col>
-            <el-col :span="8" class="flight-time">
-                <!-- 计算属性写起来和方法一样，但用起来是属性 -->
-              <span>{{rankTime}}</span>
-            </el-col>
-            <el-col :span="8" class="flight-airport">
-              <strong>{{data.arr_time}}</strong>
-              <span>{{data.dst_airport_name}}</span>
-            </el-col>
-          </el-row>
-        </el-col>
-        <el-col :span="6" class="flight-info-right">
-          ￥
-          <span class="sell-price">{{data.seat_infos[0].org_settle_price}}</span>起
-        </el-col>
-      </el-row>
-    </div>
-    <div class="flight-recommend">
-      <!-- 隐藏的座位信息列表 -->
-      <el-row type="flex" justify="space-between" align="middle" v-show="isShow">
-        <el-col :span="4">低价推荐</el-col>
         <el-col :span="20">
-          <el-row type="flex" justify="space-between" align="middle" 
-           class="flight-sell" v-for="(item,index) in data.seat_infos" :key="index">
-            <el-col :span="16" class="flight-sell-left">
-              <span>{{item.group_name}}</span> | {{item.supplierName}}
+          <!-- 需要把一列列改成一行行，用el-row -->
+          <el-row
+            type="flex"
+            class="middleContain"
+            justify="space-between"
+            align="middle"
+            v-for="(item,index) in data.seat_infos"
+            :key="index"
+          >
+            <el-col :span="14" class="containText">
+              <span>{{item.group_name}}</span>
+              | {{item.supplierName}}
             </el-col>
-            <el-col :span="5" class="price">￥{{item.settle_price_coupon}}</el-col>
-            <el-col :span="3" class="choose-button">
-              <el-button type="warning" size="mini">选定</el-button>
-              <p>剩余：{{item.discount}}</p>
+            <el-col :span="4" class="priceCoupon">
+              <span>￥{{item.settle_price_coupon}}</span>
+            </el-col>
+            <el-col :span="4" class="selectBtn">
+              <p class="btn">选定</p>
+              <p class="remain">剩余{{item.discount}}</p>
             </el-col>
           </el-row>
         </el-col>
@@ -52,127 +59,124 @@
 
 <script>
 export default {
-    props:{
-        data:{
-            type:Object,
-            default:{}
-        }
-    },
-    data(){
-        return{
-            isShow:false
-
-        }
-    },
-    computed:{
-        rankTime(){
-            // 08:35用字符串split（）方法分割成数组
-           const arr=this.data.arr_time.split(':')
-           const dep=this.data.dep_time.split(':')
-           //数组的第一项是小时，需要变成分钟，又因为两个字符串可以用++强制变成number
-           const arrVal=arr[0]*60+ +arr[1]
-           const depVal=dep[0]*60+ +dep[1]
-        //    到达时间-出发时间，用Math.floor方法向下取值
-           let dis=Math.floor((arrVal-depVal)/60)
-        //    如果是凌晨达到的话需要进行+24
-           if(arrVal<depVal){
-              dis+=24 
-           }
-        //    得到的小时用%取余就是分钟
-           let min=dis%60  
-           //因为是一个函数，所以需要return返回数据
-           return (dis+"小时"+min+"分")
-        }
+  props: {
+    data: {
+      type: Object,
+      default: {}
     }
-};
-</script>
-
-<style scoped lang="less">
-.flight-item {
-  border: 1px #ddd solid;
-  margin-bottom: 10px;
-
-  .flight-info {
-    padding: 15px;
-    cursor: pointer;
-
-    > div {
-      &:first-child,
-      &:last-child {
-        text-align: center;
+  },
+  data() {
+    return {
+      isShow: false
+    };
+  },
+  // 计算属性
+  computed: {
+    getTime() {
+      //    22:10  20:20
+      const des = this.data.dep_time.split(":"); //[20,20]
+      const arr = this.data.arr_time.split(":"); //[22,10]
+      const desValue = des[0] * 60 + +des[1];
+      const arrValue = arr[0] * 60 + +arr[1];
+      let dis = Math.floor((arrValue - desValue) / 60);
+      if (desValue > arrValue) {
+        dis += 24;
       }
+      const min = dis % 60;
+      //   return返回多数据时记得带上括号
+      return dis + "时" + min + "分";
     }
   }
-
-  .flight-info-center {
-    padding: 0 30px;
-    text-align: center;
-
-    .flight-airport {
-      strong {
-        display: block;
+};
+</script>
+<style lang="less" scoped>
+.flightslist {
+  margin: 10px 0;
+  // height: 100px;
+  .listDetail {
+    border: 1px solid #ccc;
+    padding: 20px 0;
+    .flightName {
+      font-size: 14px;
+      margin-left: 65px;
+      margin-top: 10px;
+    }
+    .desLocation {
+      margin-left: -50px;
+      p {
         font-size: 24px;
-        font-weight: normal;
+        margin-top: -5px;
       }
       span {
         font-size: 12px;
         color: #999;
       }
     }
+    .timing {
+      margin-left: -50px;
 
-    .flight-time {
-      span {
-        display: inline-block;
-        padding: 10px 0;
-        border-bottom: 1px #eee solid;
+      p {
+        width: 55px;
+        font-size: 14px;
         color: #999;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #eee;
       }
     }
-  }
-
-  .flight-info-right {
-    .sell-price {
-      font-size: 24px;
-      color: orange;
-      margin: 0 2px;
-    }
-  }
-}
-
-.flight-recommend {
-  background: #f6f6f6;
-  border-top: 1px #eee solid;
-  padding: 0 20px;
-
-  .flight-sell {
-    border-bottom: 1px #eee solid;
-    padding: 10px 0;
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .flight-sell-left {
-      font-size: 12px;
-      span {
-        color: green;
-      }
-    }
-
     .price {
-      font-size: 20px;
-      color: orange;
+      margin-top: 5px;
+      span {
+        font-size: 14px;
+      }
+      strong {
+        font-size: 24px;
+        color: #ffa500;
+        font-weight: normal;
+      }
     }
-
-    .choose-button {
-      text-align: center;
-      color: #666;
-      button {
-        display: block;
-        width: 100%;
-        margin-bottom: 5px;
+  }
+  .hiddenBox {
+    background-color: #f6f6f6;
+    font-size: 12px;
+    .contain {
+      .leftContain {
+        text-align: center;
+        vertical-align: middle;
+        font-size: 14px;
+      }
+      .middleContain {
+        padding: 20px 0;
+        border-bottom: 1px solid #eee;
+        .containText {
+          span {
+            color: #22922b;
+          }
+        }
+        .priceCoupon {
+          font-size: 20px;
+          color: #ffa500;
+        }
+        .selectBtn {
+          .btn {
+            width: 75px;
+            height: 30px;
+            line-height: 30px;
+            text-align: center;
+            color: #fff;
+            background-color: #ffa500;
+            border-radius: 5px;
+          }
+          .remain{
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            margin-left: 15px;
+          }
+        }
       }
     }
   }
 }
 </style>
+
+

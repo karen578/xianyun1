@@ -33,11 +33,13 @@
       <div class="salePic">
         <el-row type="flex" justify="space-around">
           <el-col :span="6" v-for="(item,index) in pics" :key="index" class="picsP">
+            <nuxt-link :to="`/air/flights?departCity=${item.departCity}&departCode=${item.departCode}&destCity=${item.destCity}&destCode=${item.destCode}&departDate=${item.depaertDate}`">
             <img :src="item.cover" alt />
             <el-row type="flex" class="picsText" justify="space-around">
             <span>{{item.departCity}}-{{item.destCity}}</span>
             <span>￥{{Number(item.price).toFixed(2)}}</span>
           </el-row>
+          </nuxt-link>
           </el-col>
         </el-row>
       </div>
